@@ -354,68 +354,6 @@ app.get('/:dbType/user/:userID', async (req, res) => {
     };
 });
 
-//Create user
-app.post('/:dbType/user', async (req, res) => {
-    switch (req.params.dbType) {
-        case 'redis':
-            try {
-                var client = await redisConnect();
-                const val = await client.json.set(`user:${req.body.userID}`, '.', req.body);
-                if (val == 'OK') {
-                    console.log(`201: User ${req.body.userID} added`);
-                    res.status(201).json({'userID': req.body.userID});
-                }
-                else {
-                    throw new Error(`User ${req.body.userID} not added`);
-                }
-            }
-            catch (err) {
-                console.error(`400: ${err.message}`);
-                res.status(400).json({error: err.message});
-            }
-            finally {
-                await client.quit();
-            };
-            break;
-        default:
-            const msg = 'Unknown DB Type';
-            console.error(`400: ${msg}`);
-            res.status(400).json({error: msg});
-            break;
-    };
-});
-
-//Read user
-app.get('/:dbType/user/:userID', async (req, res) => {
-    switch (req.params.dbType) {
-        case 'redis':
-            try {
-                var client = await redisConnect();
-                const user = await client.json.get(`user:${req.params.userID}`, {path: '.'});
-                if (user) {
-                    console.log(`200: User ${req.params.userID} found`);
-                    res.status(200).json(user);
-                }
-                else {
-                    throw new Error(`User ${req.params.userID} not found`);
-                }
-            }
-            catch (err) {
-                console.error(`400: ${err.message}`);
-                res.status(400).json({error: err.message});
-            }
-            finally {
-                await client.quit();
-            };
-            break;
-        default:
-            const msg = 'Unknown DB Type';
-            console.error(`400: ${msg}`);
-            res.status(400).json({error: msg});
-            break;
-    };
-});
-
 //Update user.  Allows for partial updates.
 app.patch('/:dbType/user/:userID', async (req, res) => {
     switch (req.params.dbType) {
@@ -483,7 +421,6 @@ app.delete('/:dbType/user/:userID', async (req, res) => {
             break;
     };
 });
-
 
 
 app.listen(8080, () => {
